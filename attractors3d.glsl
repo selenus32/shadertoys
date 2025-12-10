@@ -63,19 +63,6 @@ vec3 juan(vec3 p) {
     return vec3(nx,ny,nz);
 }
 
-// from https://www.shadertoy.com/view/Msy3Dm
-vec3 Grad1(float x)
-{
-    x = clamp(x, 0.0, 1.0);
-    
-    vec3 col = vec3(1.);
-    
-    col = mix(col, vec3(1.00, 0.35, 0.00), pow(x, 0.35));
-    col = mix(col, vec3(0.50, 0.00, 0.50), smoothstep(0.05,0.8,x));
-    
-    return col;
-}
-
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord - iResolution.xy*0.5) / iResolution.y;
     vec2 res = iResolution.xy / iResolution.y;
@@ -83,27 +70,30 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     float fov = 90.;
     vec3 rd = normalize(vec3(uv, fov*pi/180.));
 
-    ro.xz *= rot(iTime*0.5);
-    rd.xz *= rot(iTime*0.5);
+    float angle_mul = 8.0;
+    ro.xz *= rot(iTime*angle_mul);
+    rd.xz *= rot(iTime*angle_mul);
 
-    vec3 prev; 
+    vec3 prev;
     vec3 next;
     prev = vec3(0.1,0.1,0.1);
     
     float sum = 0.0;
+    float blur = 1.3;
+    float ps = blur/250.;
 
     int i = 0;
     for(int i = 0; i < 4096; i++) {
         next = ATTRACTOR(prev);
-        float d = length(cross(next - ro, rd));
+        float r = 0.04;
+        float d = length(cross(next - ro, rd)) - r;
 
-        sum += smoothstep(1.3/iResolution.x, 0.0, d-0.04);
+        sum += smoothstep(ps, 0.0, d);
         
         prev = next;
     }
     
-    sum /= 1.3/iResolution.x;
-    sum *= 0.0001;
-    
-    fragColor = vec4(Grad1(sum),1.);
+    sum *= 0.08;
+    vec4 col = vec4(0.,1.,0.,1.);
+    fragColor = vec4(sum*col);
 }
