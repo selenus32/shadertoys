@@ -32,7 +32,7 @@ vec3 cliff(vec3 p) {
     return vec3(nx, ny, nz)*log(texture(iChannel0,vec2(0.05,0.05)).x)*1.5;
 }
 
-vec3 lorentz(vec3 p) {
+vec3 lorenz(vec3 p) {
     float x = p.x, y = p.y, z = p.z;
     
     float h = 0.01;
